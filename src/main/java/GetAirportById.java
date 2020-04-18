@@ -14,9 +14,9 @@ import proxy.ApiGatewayProxyResponse;
 import proxy.ApiGatewayRequest;
 import util.ConnectUtil;
 
-public class GetAirportById implements RequestHandler<ApiGatewayRequest, Object> {
+public class GetAirportById implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
-	public Object handleRequest(ApiGatewayRequest request, Context context) {
+	public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
 		Airport airport = new Airport();
 		Connection connection = null;
 		LambdaLogger logger = context.getLogger();
@@ -32,9 +32,12 @@ public class GetAirportById implements RequestHandler<ApiGatewayRequest, Object>
 			airport.setCode(rs.getString("airportCode"));
 			airport.setName(rs.getString("airportName"));
 			airport.setLocation(rs.getString("airportLocation"));
-		} catch (ClassNotFoundException | NullPointerException | SQLException e) {
+		} catch (NullPointerException | SQLException e) {
 			logger.log(e.getMessage());
 			return new ApiGatewayProxyResponse(400, null, null);
+		} catch (ClassNotFoundException e) {
+			logger.log(e.getMessage());
+			return new ApiGatewayProxyResponse(500, null, null);
 		}
 		return new ApiGatewayProxyResponse(200, null, new Gson().toJson(airport));
 	}
