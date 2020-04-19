@@ -1,7 +1,4 @@
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -12,29 +9,23 @@ import com.google.gson.Gson;
 import entity.Airport;
 import proxy.ApiGatewayProxyResponse;
 import proxy.ApiGatewayRequest;
-import util.ConnectUtil;
+import service.AgentService;
 
 public class GetAirportById implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
+	private AgentService agentService = new AgentService();
+
 	public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
-		Airport airport = new Airport();
-		Connection connection = null;
 		LambdaLogger logger = context.getLogger();
 		try {
 			if (request.getPathParameters() == null || request.getPathParameters().get("airportId") == null) {
 				return new ApiGatewayProxyResponse(400, null, null);
 			}
-			connection = ConnectUtil.getInstance().getConnection();
-			PreparedStatement pstmt = connection
-					.prepareStatement("SELECT * FROM Airport WHERE Airport.airportCode = ?");
-			pstmt.setString(1, request.getPathParameters().get("airportId"));
-			ResultSet rs = pstmt.executeQuery();
-			if (!rs.next()) {
+			Airport airport = agentService.getAirportById(request.getPathParameters().get("airportId"));
+			if (airport == null) {
 				return new ApiGatewayProxyResponse(404, null, null);
 			}
-			airport.setCode(rs.getString("airportCode"));
-			airport.setName(rs.getString("airportName"));
-			airport.setLocation(rs.getString("airportLocation"));
+			return new ApiGatewayProxyResponse(200, null, new Gson().toJson(airport));
 		} catch (SQLException e) {
 			logger.log(e.getMessage());
 			return new ApiGatewayProxyResponse(400, null, null);
@@ -42,6 +33,5 @@ public class GetAirportById implements RequestHandler<ApiGatewayRequest, ApiGate
 			logger.log(e.getMessage());
 			return new ApiGatewayProxyResponse(500, null, null);
 		}
-		return new ApiGatewayProxyResponse(200, null, new Gson().toJson(airport));
 	}
 }

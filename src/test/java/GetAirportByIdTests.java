@@ -36,7 +36,7 @@ public class GetAirportByIdTests {
 	}
 
 	@Test
-	public void getAirportById400() {
+	public void getAirportById404() {
 		ApiGatewayRequest request = Mockito.mock(ApiGatewayRequest.class);
 		Map<String, String> pathParameters = new HashMap<String, String>();
 		pathParameters.put("airportId", "0");
