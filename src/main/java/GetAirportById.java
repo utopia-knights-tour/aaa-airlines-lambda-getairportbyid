@@ -21,6 +21,9 @@ public class GetAirportById implements RequestHandler<ApiGatewayRequest, ApiGate
 		Connection connection = null;
 		LambdaLogger logger = context.getLogger();
 		try {
+			if (request.getPathParameters() == null || request.getPathParameters().get("airportId") == null) {
+				return new ApiGatewayProxyResponse(400, null, null);
+			}
 			connection = ConnectUtil.getInstance().getConnection();
 			PreparedStatement pstmt = connection
 					.prepareStatement("SELECT * FROM Airport WHERE Airport.airportCode = ?");
@@ -32,7 +35,7 @@ public class GetAirportById implements RequestHandler<ApiGatewayRequest, ApiGate
 			airport.setCode(rs.getString("airportCode"));
 			airport.setName(rs.getString("airportName"));
 			airport.setLocation(rs.getString("airportLocation"));
-		} catch (NullPointerException | SQLException e) {
+		} catch (SQLException e) {
 			logger.log(e.getMessage());
 			return new ApiGatewayProxyResponse(400, null, null);
 		} catch (ClassNotFoundException e) {
