@@ -21,7 +21,6 @@ public class GetAirportById implements RequestHandler<ApiGatewayRequest, ApiGate
 		LambdaLogger logger = context.getLogger();
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Access-Control-Allow-Origin", "*");
-		headers.put("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 		try {
 			if (request.getPathParameters() == null || request.getPathParameters().get("airportId") == null) {
 				return new ApiGatewayProxyResponse(400, headers, null);
